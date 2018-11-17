@@ -26,7 +26,7 @@ if not os.path.exists(output_dir):
 
 # the filenames should be in the form 'speaker-data-subject-1.csv', e.g. 'speaker-data-Erik-1.csv'.
 
-class_names = [] # the set of classes, i.e. speakers
+class_names = ["Abhinav", "Elizabeth", "Aashish", "No_sound"] # the set of classes, i.e. speakers
 
 data = np.zeros((0,8002)) #8002 = 1 (timestamp) + 8000 (for 8kHz audio data) + 1 (label)
 
@@ -54,7 +54,7 @@ print("Found data for {} speakers : {}".format(len(class_names), ", ".join(class
 # -----------------------------------------------------------------------------
 
 # Update this depending on how you compute your features
-n_features = 2040 
+n_features = 1062
 
 print("Extracting features and labels for {} audio windows...".format(data.shape[0]))
 sys.stdout.flush()
@@ -97,29 +97,29 @@ total_recall = [0.0, 0.0, 0.0, 0.0]
 
 cv = cross_validation.KFold(n, n_folds=10, shuffle=True, random_state=None)
 for i, (train_indexes, test_indexes) in enumerate(cv):
-   X_train = X[train_indexes, :]
-   y_train = y[train_indexes]
-   X_test = X[test_indexes, :]
-   y_test = y[test_indexes]
-   tree = DecisionTreeClassifier(criterion="entropy", max_depth=3)
-   print("Fold {} : Training decision tree classifier over {} points...".format(i, len(y_train)))
-   sys.stdout.flush()
-   tree.fit(X_train, y_train)
-   print("Evaluating classifier over {} points...".format(len(y_test)))
+    X_train = X[train_indexes, :]
+    y_train = y[train_indexes]
+    X_test = X[test_indexes, :]
+    y_test = y[test_indexes]
+    tree = DecisionTreeClassifier(criterion="entropy", max_depth=3)
+    print("Fold {} : Training decision tree classifier over {} points...".format(i, len(y_train)))
+    sys.stdout.flush()
+    tree.fit(X_train, y_train)
+    print("Evaluating classifier over {} points...".format(len(y_test)))
    
    # predict the labels on the test data
-   y_pred = tree.predict(X_test)
+    y_pred = tree.predict(X_test)
 
-   # show the comparison between the predicted and ground-truth labels
-   conf = confusion_matrix(y_test, y_pred, labels=[0,1,2,3])
-   
-   accuracy = np.sum(np.diag(conf)) / float(np.sum(conf))
-   precision = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=1).astype(float))
-   recall = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=0).astype(float))
-   
-   total_accuracy += accuracy
-   total_precision += precision
-   total_recall += recall
+    # show the comparison between the predicted and ground-truth labels
+    conf = confusion_matrix(y_test, y_pred, labels=[0,1,2,3])
+
+    accuracy = np.sum(np.diag(conf)) / float(np.sum(conf))
+    precision = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=1).astype(float))
+    recall = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=0).astype(float))
+
+    total_accuracy += accuracy
+    total_precision += precision
+    total_recall += recall
    
 print("The average accuracy is {}".format(total_accuracy/10.0))  
 print("The average precision is {}".format(total_precision/10.0))    
@@ -134,35 +134,36 @@ total_accuracy = 0.0
 total_precision = [0.0, 0.0, 0.0, 0.0]
 total_recall = [0.0, 0.0, 0.0, 0.0]
 for i, (train_indexes, test_indexes) in enumerate(cv):
-   X_train = X[train_indexes, :]
-   y_train = y[train_indexes]
-   X_test = X[test_indexes, :]
-   y_test = y[test_indexes]
-   print("Fold {} : Training Random Forest classifier over {} points...".format(i, len(y_train)))
-   sys.stdout.flush()
-   clf = RandomForestClassifier(n_estimators=100)
-   clf.fit(X_train, y_train)
+    X_train = X[train_indexes, :]
+    y_train = y[train_indexes]
+    X_test = X[test_indexes, :]
+    y_test = y[test_indexes]
+    print("Fold {} : Training Random Forest classifier over {} points...".format(i, len(y_train)))
+    sys.stdout.flush()
+    clf = RandomForestClassifier(n_estimators=100)
+    clf.fit(X_train, y_train)
    
-   print("Evaluating classifier over {} points...".format(len(y_test)))
-   # predict the labels on the test data
-   y_pred = clf.predict(X_test)
+    print("Evaluating classifier over {} points...".format(len(y_test)))
+    # predict the labels on the test data
+    y_pred = clf.predict(X_test)
 
-   # show the comparison between the predicted and ground-truth labels
-   conf = confusion_matrix(y_test, y_pred, labels=[0,1,2,3])
+    # show the comparison between the predicted and ground-truth labels
+    conf = confusion_matrix(y_test, y_pred, labels=[0,1,2,3])
+
+    accuracy = np.sum(np.diag(conf)) / float(np.sum(conf))
+    precision = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=1).astype(float))
+    recall = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=0).astype(float))
    
-   accuracy = np.sum(np.diag(conf)) / float(np.sum(conf))
-   precision = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=1).astype(float))
-   recall = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=0).astype(float))
-   
-   total_accuracy += accuracy
-   total_precision += precision
-   total_recall += recall
+    total_accuracy += accuracy
+    total_precision += precision
+    total_recall += recall
    
 print("The average accuracy is {}".format(total_accuracy/10.0))  
 print("The average precision is {}".format(total_precision/10.0))    
 print("The average recall is {}".format(total_recall/10.0))  
 
 # TODO: (optional) train other classifiers and print the average metrics using 10-fold cross-validation
+
 
 # Set this to the best model you found, trained on all the data:
 best_classifier = RandomForestClassifier(n_estimators=100)

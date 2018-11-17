@@ -64,7 +64,7 @@ class FeatureExtractor():
     
         # Convert the angular frequencies from rad/sample to Hz; then calculate the 
         # bandwidths of the formants. The distance of the roots from the unit circle 
-        # gives the bandwidths of the formants (*Extra credit* if you can explain this!).
+        # gives the bandwidths of the formants (Extra credit if you can explain this!).
         unsorted_freqs = angz * (Fs / (2 * math.pi))
         
         # Let's sort the frequencies so that when we later compare them, we don't overestimate
@@ -90,7 +90,9 @@ class FeatureExtractor():
         You should compute the distribution of the frequencies in fixed bins.
         This will give you a feature vector of length len(bins).
         """
-        return [1] # returns dummy value; replace this with the features you extract
+        freq, bw= self._compute_formants(window)
+        a= np.histogram(a=freq, bins=35, range=(0,5500))
+        return a[0] #[1]returns dummy value; replace this with the features you extract
 
     
     def _compute_mfcc(self, window):
@@ -129,7 +131,23 @@ class FeatureExtractor():
         See section "Deltas and Delta-Deltas" at http://practicalcryptography.com/miscellaneous/machine-learning/guide-mel-frequency-cepstral-coefficients-mfccs/.
         
         """
-        return [1] # returns dummy value; replace this with the features you extract
+        mfcc_feats = self._compute_mfcc(window)       
+        padded = np.pad(mfcc_feats, ((n, n), (0,0)), mode='edge')
+        denominator = 2 * np.sum([i**2 for i in range(1, n+1)])
+        delta_feat = [0]*len(mfcc_feats)*13        
+        
+        for t in range(n, len(mfcc_feats)-n):
+            for i in range(1, n+1):
+                delta_feat[t] = np.sum(i * (padded[t+i,:] - padded[t-i,:])) / denominator
+                
+        #delta_feat = np.delete(delta_feat, 0);
+        #delta_feat = np.delete(delta_feat, 1);
+        #delta_feat = np.delete(delta_feat, 11);
+        #delta_feat = np.delete(delta_feat, 12);
+        delta_feat = np.asarray(delta_feat)
+        delta_feat = np.ndarray.flatten(delta_feat)
+        #print(len(delta_feat))
+        return delta_feat # returns dummy value; replace this with the features you extract
         
     def extract_features(self, window, debug=True):
         """
@@ -145,4 +163,4 @@ class FeatureExtractor():
         x = np.append(x, self._compute_formant_features(window))
         x = np.append(x, self._compute_delta_coefficients(window))
         
-        return x    
+        return x

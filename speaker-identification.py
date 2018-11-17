@@ -10,7 +10,7 @@ from features import FeatureExtractor
 import os
 
 # TODO: Replace the string with your user ID
-user_id = "test"
+user_id = "aashish7k5"
 
 # Load the classifier:
 output_dir = 'training_output'
@@ -43,7 +43,7 @@ def predict(window):
     X = np.reshape(X,(1,-1))
     
     # TODO: Fill in speaker names. Make sure labels match your training data
-    classes = [] #...
+    classes = ["Abhinav", "Elizabeth", "Aashish", "No_sound"] #...
     
     index = classifier.predict(X)
     speaker = classes[int(index)]
